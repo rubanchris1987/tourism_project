@@ -1,0 +1,35 @@
+name: Tourism MLOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  ml_pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        pip install pandas scikit-learn datasets huggingface_hub mlflow
+
+    - name: Login to Hugging Face
+      run: |
+        echo "${{ secrets.HF_TOKEN }}" | huggingface-cli login --token
+
+    - name: Run Data Preparation
+      run: python src/data_preparation.py
+
+    - name: Train Model
+      run: python src/train_model.py
+
+    - name: Upload Model to HF Hub
+      run: python src/upload_model.py
